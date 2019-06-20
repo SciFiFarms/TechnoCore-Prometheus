@@ -15,22 +15,33 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['prometheus:9090']
+        labels:                           
+          job: 'prometheus'
 
   - job_name: 'node-exporter'       
     static_configs:       
       - targets: ['node_exporter:9100']       
+        labels:                           
+          job: 'node-exporter'
                 
   - job_name: 'cadvisor'       
     static_configs:                       
       - targets: ['cadvisor:8080']
+        labels:                           
+          job: 'cadvisor'
   
   - job_name: 'nextcloud'
     static_configs:
       - targets: ['nextcloud_exporter:9205']
+        labels:                           
+          job: 'nextcloud'
 
   - job_name: 'vernemq'
     static_configs:
       - targets: ['mqtt.local:8888']
+        labels:                           
+          job: 'vernemq'
+
 
   #- job_name: 'home-assistant'
   #  metrics_path: /api/prometheus
