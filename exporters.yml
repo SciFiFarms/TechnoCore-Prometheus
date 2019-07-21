@@ -1,0 +1,83 @@
+version: "3.5"
+
+secrets:
+  nextcloud_exporter_url:
+    name: ${stack_name:-technocore}_nextcloud_exporter_url
+    external: true
+  nextcloud_exporter_username:
+    name: ${stack_name:-technocore}_nextcloud_exporter_username
+    external: true
+  nextcloud_exporter_password:
+    name: ${stack_name:-technocore}_nextcloud_exporter_password
+    external: true
+
+services:
+  cadvisor:
+    command: -logtostderr -docker_only
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+      restart_policy:
+        condition: any
+    image: google/cadvisor:v0.33.0
+    #<<: *logging-defaults
+    networks:
+      - prometheus
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+  nextcloud_exporter:
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+      restart_policy:
+        condition: any
+    image: ${image_provider:-scififarms}/technocore-nextcloud-exporter:${TAG:-latest}
+    #<<: *logging-defaults
+    networks:
+      - prometheus
+    secrets:
+      - source: nextcloud_exporter_url
+        target: url
+      - source: nextcloud_exporter_username
+        target: username
+      - source: nextcloud_exporter_password
+        target: password
+  
+  node_exporter:
+    command:       
+      - '--path.procfs=/host/proc'       
+      - '--path.sysfs=/host/sys'       
+      - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'       
+      - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'       
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+      restart_policy:
+        condition: any
+    environment:
+      - NODE_ID={{.Node.ID}}
+    image: stefanprodan/swarmprom-node-exporter:v0.16.0
+    #<<: *logging-defaults
+    networks:
+      - prometheus
+    volumes:       
+      - /proc:/host/proc:ro       
+      - /sys:/host/sys:ro       
+      - /:/rootfs:ro       
+      - /etc/hostname:/etc/nodename

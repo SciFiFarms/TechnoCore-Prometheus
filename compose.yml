@@ -1,0 +1,48 @@
+
+version: "3.5"
+
+networks:
+  prometheus:
+volumes:
+  prometheus:
+
+services:
+  ingress:
+    networks:
+      - prometheus
+      
+  prometheus:
+    image: ${image_provider:-scififarms}/technocore-prometheus:${TAG:-latest}
+    environment:
+      - PATH_PREFIX=${PROMETHEUS_PATH_PREFIX:-/}
+    #<<: *logging-defaults
+    volumes:
+      - prometheus:/prometheus
+  
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 128M
+      labels:
+        - traefik.frontend.rule=Host:prometheus.${DOMAIN}
+        - traefik.enable=true
+        - traefik.port=9090
+        - traefik.tags=ingress
+        - traefik.docker.network=${STACK_NAME:-technocore}_prometheus
+        # Traefik service that listens to HTTP
+        - traefik.redirectorservice.frontend.entryPoints=http
+        - traefik.redirectorservice.frontend.redirect.entryPoint=https
+        # Traefik service that listens to HTTPS
+        - traefik.webservice.frontend.entryPoints=https
+        #- traefik.frontend.auth.basic.users=${ADMIN_USER}:${HASHED_PASSWORD}
+    networks:
+      - prometheus
