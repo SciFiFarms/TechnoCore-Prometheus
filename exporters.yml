@@ -24,7 +24,10 @@ services:
       restart_policy:
         condition: any
     image: google/cadvisor:v0.33.0
-    #<<: *logging-defaults
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
     networks:
       - prometheus
     volumes:
