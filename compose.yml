@@ -15,7 +15,10 @@ services:
     image: ${image_provider:-scififarms}/technocore-prometheus:${TAG:-latest}
     environment:
       - PATH_PREFIX=${PROMETHEUS_PATH_PREFIX:-/}
-    #<<: *logging-defaults
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
     volumes:
       - prometheus:/prometheus
   

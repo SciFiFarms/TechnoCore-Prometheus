@@ -44,7 +44,10 @@ services:
       restart_policy:
         condition: any
     image: ${image_provider:-scififarms}/technocore-nextcloud-exporter:${TAG:-latest}
-    #<<: *logging-defaults
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
     networks:
       - prometheus
     secrets:
@@ -73,7 +76,10 @@ services:
     environment:
       - NODE_ID={{.Node.ID}}
     image: stefanprodan/swarmprom-node-exporter:v0.16.0
-    #<<: *logging-defaults
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
     networks:
       - prometheus
     volumes:       
