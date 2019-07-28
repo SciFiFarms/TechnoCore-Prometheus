@@ -46,6 +46,6 @@ services:
         - traefik.redirectorservice.frontend.redirect.entryPoint=https
         # Traefik service that listens to HTTPS
         - traefik.webservice.frontend.entryPoints=https
-        #- traefik.frontend.auth.basic.users=${ADMIN_USER}:${HASHED_PASSWORD}
+        - ${TRAEFIK_BASIC_AUTH}
     networks:
       - prometheus
