@@ -36,7 +36,7 @@ services:
         reservations:
           memory: 128M
       labels:
-        - traefik.frontend.rule=Host:prometheus.${DOMAIN}
+        - traefik.frontend.rule=HostRegexp:prometheus.{domain:.+}
         - traefik.enable=true
         - traefik.port=9090
         - traefik.tags=ingress
