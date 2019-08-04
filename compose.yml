@@ -36,9 +36,11 @@ services:
         reservations:
           memory: 128M
       labels:
-        - traefik.frontend.rule=HostRegexp:prometheus.{domain:.+}
-        - traefik.enable=true
+        - traefik.frontend.rule=$PROMETHEUS_ROUTING_LABEL
+        - traefik.frontend.priority=$PROMETHEUS_ROUTING_LABEL_PRIORITY
         - traefik.port=9090
+        - ${TRAEFIK_BASIC_AUTH}
+        - traefik.enable=true
         - traefik.tags=ingress
         - traefik.docker.network=${STACK_NAME:-technocore}_prometheus
         # Traefik service that listens to HTTP
@@ -46,6 +48,5 @@ services:
         - traefik.redirectorservice.frontend.redirect.entryPoint=https
         # Traefik service that listens to HTTPS
         - traefik.webservice.frontend.entryPoints=https
-        - ${TRAEFIK_BASIC_AUTH}
     networks:
       - prometheus

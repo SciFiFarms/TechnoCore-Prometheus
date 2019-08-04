@@ -2,7 +2,7 @@
 
 set_service_flag prometheus enable
 
-path_prefix PROMETHEUS prometheus
+#prefix=
 
 # If the include exporters flag is set
 if [ ! -z "$SERVICE_prometheus_exporters" ]; then
