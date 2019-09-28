@@ -36,6 +36,7 @@ services:
         reservations:
           memory: 128M
       labels:
+        - com.ouroboros.enable=true
         - traefik.frontend.rule=$PROMETHEUS_ROUTING_LABEL
         - traefik.frontend.priority=$PROMETHEUS_ROUTING_LABEL_PRIORITY
         - traefik.port=9090
