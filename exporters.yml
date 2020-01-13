@@ -36,6 +36,24 @@ services:
       - /var/run:/var/run
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+  # TODO: Add back SNMP exporter.
+  #snmp_exporter:
+  #  # TODO: This gets configured via relabeling in the prometheus config. We 
+  #  #       should instead set some labels here and manage prometheus via labels.
+  #  deploy:
+  #    mode: global
+  #    restart_policy:
+  #      condition: any
+  #    resources:
+  #      limits:
+  #        memory: 128M
+  #      reservations:
+  #        memory: 64M
+  #  image: ricardbejarano/snmp_exporter:0.15.0
+  #  <<: *logging-defaults
+  #  networks:
+  #    - prometheus
+
   nextcloud_exporter:
     deploy:
       mode: global
@@ -67,6 +85,10 @@ services:
       - '--path.sysfs=/host/sys'       
       - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'       
       - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'       
+      # Experimental
+      #- '--collector.textfile.directory=/etc/node-exporter/'
+      #- '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      #- '--no-collector.ipvs'
     deploy:
       mode: global
       resources:

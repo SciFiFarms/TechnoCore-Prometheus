@@ -1,6 +1,6 @@
 #!/bin/env bash
 
-set_service_flag prometheus enable
+set_service_flag prometheus
 
 #prefix=
 
