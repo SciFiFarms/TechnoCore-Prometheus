@@ -38,8 +38,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
   # TODO: Add back SNMP exporter.
   #snmp_exporter:
-  #  # TODO: This gets configured via relabeling in the prometheus config. We 
-  #  #       should instead set some labels here and manage prometheus via labels.
   #  deploy:
   #    mode: global
   #    restart_policy:
@@ -49,42 +47,46 @@ services:
   #        memory: 128M
   #      reservations:
   #        memory: 64M
-  #  image: ricardbejarano/snmp_exporter:0.15.0
-  #  <<: *logging-defaults
+  #  image: ricardbejarano/snmp_exporter:0.19.0
+  #  logging:
+  #    driver: "${LOGGING_DRIVER}"
+  #    options:
+  #      tag: "{{.Name}}"
   #  networks:
   #    - prometheus
 
-  nextcloud_exporter:
-    deploy:
-      mode: global
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-      restart_policy:
-        condition: any
-    image: ${image_provider:-scififarms}/technocore-nextcloud-exporter:${TAG:-latest}
-    logging:
-      driver: "${LOGGING_DRIVER}"
-      options:
-        tag: "{{.Name}}"
-    networks:
-      - prometheus
-    secrets:
-      - source: nextcloud_exporter_url
-        target: url
-      - source: nextcloud_exporter_username
-        target: username
-      - source: nextcloud_exporter_password
-        target: password
+  # TODO: Split nextcloud_exporter into it's own option + .yml file?
+  #nextcloud_exporter:
+  #  deploy:
+  #    mode: global
+  #    resources:
+  #      limits:
+  #        memory: 128M
+  #      reservations:
+  #        memory: 64M
+  #    restart_policy:
+  #      condition: any
+  #  image: ${image_provider:-scififarms}/technocore-nextcloud-exporter:${TAG:-latest}
+  #  logging:
+  #    driver: "${LOGGING_DRIVER}"
+  #    options:
+  #      tag: "{{.Name}}"
+  #  networks:
+  #    - prometheus
+  #  secrets:
+  #    - source: nextcloud_exporter_url
+  #      target: url
+  #    - source: nextcloud_exporter_username
+  #      target: username
+  #    - source: nextcloud_exporter_password
+  #      target: password
   
   node_exporter:
     command:       
       - '--path.procfs=/host/proc'       
       - '--path.sysfs=/host/sys'       
-      - '--collector.filesystem.ignored-mount-points="^(/rootfs|/host|)/(sys|proc|dev|host|etc)($$|/)"'       
-      - '--collector.filesystem.ignored-fs-types="^(sys|proc|auto|cgroup|devpts|ns|au|fuse\.lxc|mqueue)(fs|)$$"'       
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'       
       # Experimental
       #- '--collector.textfile.directory=/etc/node-exporter/'
       #- '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
@@ -100,15 +102,16 @@ services:
         condition: any
     environment:
       - NODE_ID={{.Node.ID}}
-    image: stefanprodan/swarmprom-node-exporter:v0.16.0
+    image: prom/node-exporter:v1.0.1
     logging:
       driver: "${LOGGING_DRIVER}"
       options:
         tag: "{{.Name}}"
     networks:
       - prometheus
+    # pid: isn't supported in swarm (yet?)
+    # pid: "host"
     volumes:       
       - /proc:/host/proc:ro       
       - /sys:/host/sys:ro       
-      - /:/rootfs:ro       
-      - /etc/hostname:/etc/nodename
+      - /:/host:ro,rslave

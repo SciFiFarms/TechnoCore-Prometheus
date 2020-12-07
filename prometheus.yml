@@ -38,7 +38,7 @@ scrape_configs:
 
   - job_name: 'vernemq'
     static_configs:
-      - targets: ['mqtt.local:8888']
+      - targets: ['mqtt:8888']
         labels:                           
           job: 'vernemq'
 
